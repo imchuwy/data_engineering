@@ -18,11 +18,12 @@ type PriceRecord = {
  */
 async function parseCsvData(): Promise<Map<string, PriceRecord[]>> {
     const data = new Map<string, PriceRecord[]>();
+    // CSV is stored alongside the app under src/data/instrument_data.csv.
     const filePath = path.join(process.cwd(), 'src', 'data', 'instrument_data.csv');
 
     try {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        const rows = fileContent.split('\n').slice(1); // Skip header row
+        const rows = fileContent.split('\n').slice(1); // Skip header row (date,symbol,price)
 
         for (const row of rows) {
             if (!row) continue;
@@ -63,6 +64,7 @@ function calculateDailyReturns(prices: PriceRecord[]): number[] {
         const yesterdayPrice = prices[i - 1].price;
         const todayPrice = prices[i].price;
         if (yesterdayPrice === 0) {
+            // Avoid divide-by-zero; treat as flat day
             returns.push(0);
         } else {
             const dailyReturn = (todayPrice - yesterdayPrice) / yesterdayPrice;
